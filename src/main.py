@@ -13,32 +13,32 @@ crs = CRS.from_epsg(3857) # Web Mercator
 equator_len = 20037508.342789244 * 2 # Web Mercator constant
 
 proj = Transformer.from_crs(crs.geodetic_crs, crs, always_xy=True) # From WGS 84 to Web Mercator
-                                                                   # input: (lon, lat)
+                                                                   # input:  (lon, lat)
                                                                    # output: (x, y)
 
 with open('../datasets/countries.geojson') as f:
     countries = json.load(f)
 
 country_index = [country["properties"]["ISO_A3"] for country in countries["features"]].index(args.country_code)
-poland = countries["features"][country_index]
-poland_boundaries_lonlat = []
-if poland["geometry"]["type"] == "Polygon":
-    poland_boundaries_lonlat = [poland["geometry"]["coordinates"][0]]
-elif poland["geometry"]["type"] == "MultiPolygon":
-    for coords in poland["geometry"]["coordinates"]:
-        poland_boundaries_lonlat.append(coords[0])
+country = countries["features"][country_index]
+country_boundaries_lonlat = []
+if country["geometry"]["type"] == "Polygon":
+    country_boundaries_lonlat = [country["geometry"]["coordinates"][0]]
+elif country["geometry"]["type"] == "MultiPolygon":
+    for coords in country["geometry"]["coordinates"]:
+        country_boundaries_lonlat.append(coords[0])
 
 # Get the xy coordinates of the Web Mercator projection
-poland_boundaries_xy = list(map(lambda boundaries_lonlat: [proj.transform(point[0], point[1]) for point in boundaries_lonlat],
-                           poland_boundaries_lonlat))
+country_boundaries_xy = list(map(lambda boundaries_lonlat: [proj.transform(point[0], point[1]) for point in boundaries_lonlat],
+                           country_boundaries_lonlat))
 
-flat_poland_boundaries_xy = [item for sublist in poland_boundaries_xy for item in sublist]
+flat_country_boundaries_xy = [item for sublist in country_boundaries_xy for item in sublist]
 
-if len(list(filter(lambda p: p[0] < -170, flat_poland_boundaries_xy))) > 0 and len(list(filter(lambda p: p[0] > 170, flat_poland_boundaries_xy))) > 0:
-    poland_boundaries_xy = list(map(lambda boundaries_xy: [p if p[0] >= 0 else (p[0] + equator_len, p[1]) for p in boundaries_xy],
-                           poland_boundaries_xy))
+if len(list(filter(lambda p: p[0] < -170, flat_country_boundaries_xy))) > 0 and len(list(filter(lambda p: p[0] > 170, flat_country_boundaries_xy))) > 0:
+    country_boundaries_xy = list(map(lambda boundaries_xy: [p if p[0] >= 0 else (p[0] + equator_len, p[1]) for p in boundaries_xy],
+                           country_boundaries_xy))
 
-flat_poland_boundaries_xy = [item for sublist in poland_boundaries_xy for item in sublist]
+flat_country_boundaries_xy = [item for sublist in country_boundaries_xy for item in sublist]
 
 def getBoundingRect(points):
     x_min, y_min = float('inf'), float('inf')
@@ -57,7 +57,7 @@ def getBoundingRect(points):
     
     return x_min, x_max, y_min, y_max
 
-x_min, x_max, y_min, y_max = getBoundingRect(flat_poland_boundaries_xy)
+x_min, x_max, y_min, y_max = getBoundingRect(flat_country_boundaries_xy)
 wm_width = x_max - x_min
 wm_height = y_max - y_min
 img_aspect_ratio = wm_width / wm_height
@@ -66,15 +66,13 @@ px_width = math.ceil(px_height * img_aspect_ratio)
 w_scale = px_width / wm_width
 h_scale = px_height / wm_height
 
-print(wm_width, wm_height)
-
 def transformPoints(points):
     return [(abs(point[0] - x_min) * w_scale, (abs(point[1] - y_max) * h_scale)) for point in points]    
 
-poland_boundaries_xy =[transformPoints(boundaries_xy) for boundaries_xy in poland_boundaries_xy]
+country_boundaries_xy =[transformPoints(boundaries_xy) for boundaries_xy in country_boundaries_xy]
 
 img = Image.new("RGB", (px_width, px_height), "#ffffff")
 img1 = ImageDraw.Draw(img)
-for boundaries_xy in poland_boundaries_xy:
+for boundaries_xy in country_boundaries_xy:
     img1.polygon(boundaries_xy, fill="#fccb88", outline="#000")
 img.show()
