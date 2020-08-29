@@ -1,0 +1,51 @@
+DB Index,Country Code,Country Name
+1,AFG,Afghanistan
+7,ARE,United Arab Emirates
+9,ARM,Armenia
+17,AZE,Azerbaijan
+22,BGD,Bangladesh
+24,BHR,Bahrain
+35,BRN,Brunei Darussalam
+36,BTN,Bhutan
+42,CHN,China
+59,CYP,Cyprus
+82,GEO,Georgia
+102,IDN,Indonesia
+104,IND,India
+108,IRN,Iran (Islamic Republic of)
+109,IRQ,Iraq
+111,ISR,Israel
+115,JOR,Jordan
+116,JPN,Japan
+119,KAZ,Kazakhstan
+121,KGZ,Kyrgyzstan
+122,KHM,Cambodia
+125,KOR,"Korea, Republic of"
+127,KWT,Kuwait
+128,LAO,Lao People's Democratic Republic
+129,LBN,Lebanon
+134,LKA,Sri Lanka
+145,MDV,Maldives
+151,MMR,Myanmar
+153,MNG,Mongolia
+160,MYS,Malaysia
+170,NPL,Nepal
+173,OMN,Oman
+174,PAK,Pakistan
+179,PHL,Philippines
+184,PRK,Korea (Democratic People's Republic of)
+187,PSE,"Palestine, State of"
+189,QAT,Qatar
+191,RUS,Russian Federation
+194,SAU,Saudi Arabia
+200,SGP,Singapore
+219,SYR,Syrian Arab Republic
+223,THA,Thailand
+224,TJK,Tajikistan
+225,TKM,Turkmenistan
+226,TLS,Timor-Leste
+230,TUR,Turkey
+232,TWN,Taiwan
+240,UZB,Uzbekistan
+246,VNM,Viet Nam
+251,YEM,Yemen
