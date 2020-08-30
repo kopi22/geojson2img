@@ -115,18 +115,60 @@ def moveToEastHemisphereXY(list_of_boundaries):
     else:
         return list(list_of_boundaries)
 
+def getRegionCountries(region_name):
+    with open('../datasets/{}.csv'.format(region_name)) as f:
+        reader = csv.reader(f)
+        next(reader) # Skip headers
+
+        country_codes = [int(row[0]) for row in reader]
+        return country_codes
+
+def a3ToDbIdx(a3_codes):
+    db_indexes = list(map(lambda a3_code: country_code2idx_map[a3_code], a3_codes))
+    db_indexes.sort()
+    return db_indexes
+
+def mergeSortedList(a: list, b: list):
+    merged_list = []
+    j = 0
+    for i in range(len(a)):
+        while(j < len(b) and b[j] <= a[i]):
+            merged_list.append(b[j])
+            j += 1
+        merged_list.append(a[i])
+    
+    if j < len(b):
+        merged_list += b[j:]
+
+    return merged_list
+        
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Print the contours of a country specifiied by ISO 3166-1 alpha-3 code.')
     parser.add_argument('--countries', '-c', action='extend', nargs='+', type=str)
-    parser.add_argument('--separate', '-s', type=bool, default=False)
+    parser.add_argument('--region', '-r')
+    parser.add_argument('--selected', '-s', action='extend', nargs='+', type=str)
     args = parser.parse_args()
 
-    countries_to_print = list(map(lambda a3_code: country_code2idx_map[a3_code], args.countries))
+    countries_to_print = []
+    if args.region is not None:
+        countries_to_print = getRegionCountries(args.region)
+    elif args.countries is not None:
+        # Map selected countries to their A3 codes
+        countries_to_print = a3ToDbIdx(args.countries)
+    
+    selected_countries = []
+    if args.selected is not None:
+        selected_countries = a3ToDbIdx(args.selected)
+        countries_to_print = mergeSortedList(countries_to_print, selected_countries)
+    
 
     # Drawing region
     region_boundaries_lonlat = getRegionLonLat(countries_to_print)
     region_boundaries_xy = lonlat2xy(region_boundaries_lonlat)
+
+    selected_boundaries_lonlat = getRegionLonLat(selected_countries)
+    selected_boundaries_xy = lonlat2xy(selected_boundaries_lonlat)
 
     flat_region_boundaries_xy = flattenList(region_boundaries_xy)
 
@@ -139,10 +181,14 @@ if __name__ == "__main__":
     w_scale = px_width / wm_width
     h_scale = px_height / wm_height
 
+    # Transform to image xy
     region_boundaries_xy = [transformPoints(boundaries_xy, x_min, y_max, w_scale, h_scale) for boundaries_xy in region_boundaries_xy]
+    selected_boundaries_xy = [transformPoints(boundaries_xy, x_min, y_max, w_scale, h_scale) for boundaries_xy in selected_boundaries_xy]
 
-    img = Image.new("RGB", (px_width, px_height), "#ffffff")
+    img = Image.new("RGB", (px_width, px_height), "#d6eeff")
     img1 = ImageDraw.Draw(img)
     for boundaries_xy in region_boundaries_xy:
-        img1.polygon(boundaries_xy, fill="#fccb88", outline="#000")
+        img1.polygon(boundaries_xy, fill="#ffeebd", outline="#000")
+    for boundaries_xy in selected_boundaries_xy:
+        img1.polygon(boundaries_xy, fill="#ff1414", outline="#000")
     img.show()
